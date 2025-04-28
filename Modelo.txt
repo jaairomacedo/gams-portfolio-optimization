@@ -1,0 +1,42 @@
+Sets
+    i /Ibov, CDI, Bitcoin/
+;
+alias (i,j)
+Parameters
+    r(i) Retorno esperado de cada ativo
+    /Ibov 0.02, CDI 0.01, Bitcoin 0.03/    
+    B  Restrição orçamentária
+    /100/
+    R_max Limite máximo de risco(Variância)
+    /20/ ;
+Table d(i,j) Matriz Var-Cov
+            CDI          Ibov        Bitcoin
+    CDI    0.001    -0.00005   -0.0062
+    Ibov   -0.00005    0.05    0.005
+    Bitcoin -0.0062   0.005    0.20 ;
+
+Variables
+    x(i)  Valor alocado em cada ativo i
+    v     Função objetivo a ser maximizada;
+
+Positive Variable x;
+
+Equations
+    Objective
+    BudgetConstraint
+    RiskConstraint;
+
+Objective..
+                v =e= sum(i, r(i)*x(i));
+
+BudgetConstraint..
+                sum(i, x(i)) =e= B;
+
+RiskConstraint..
+                sum((i,j), x(i)*d(i,j)*x(j)) =l= R_max;
+
+Model PortfolioOptimization /all/;
+
+Solve PortfolioOptimization using nlp maximizing v;
+
+Display x.l, v.l;
